@@ -75,6 +75,11 @@ const run = async () => {
       const rejult = await revews.insertOne(data);
       res.send(rejult);
     });
+    app.delete("/deleterevew/:id", async (req, res) => {
+      const { id } = req.params;
+      const rejult = await revews.deleteOne({ _id: ObjectId(id) });
+      res.send(rejult);
+    });
   } finally {
   }
 };
