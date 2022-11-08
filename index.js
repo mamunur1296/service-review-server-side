@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 require("dotenv").config();
 //meselWoore
@@ -17,10 +17,35 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const services = client.db("assainment11").collection("services");
-
-    const data = { mamun: "mamun" };
-    const rejult = await services.insertOne(data);
-    console.log(rejult);
+    app.get("/servises", async (req, res) => {
+      const query = {};
+      const data = await services.find(query).limit(3).toArray();
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
+    app.get("/allservises", async (req, res) => {
+      const query = {};
+      const data = await services.find(query).toArray();
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
+    app.get("/servicedetails/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = await services.findOne({ _id: ObjectId(id) });
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
+    app.post("/poats", async (req, res) => {
+      const data = req.body;
+      const rejult = await services.insertOne(data);
+      res.send(rejult);
+    });
   } finally {
   }
 };
