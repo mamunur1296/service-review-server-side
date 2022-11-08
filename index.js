@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { query } = require("express");
 const app = express();
 require("dotenv").config();
 //meselWoore
@@ -17,6 +18,7 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const services = client.db("assainment11").collection("services");
+    const revews = client.db("assainment11").collection("revews");
     app.get("/servises", async (req, res) => {
       const query = {};
       const data = await services.find(query).limit(3).toArray();
@@ -41,9 +43,36 @@ const run = async () => {
         data: data,
       });
     });
+    app.get("/allrevew/:id", async (req, res) => {
+      const { id } = req.params;
+      const quary = { revewId: id };
+      const data = await revews.find(quary).toArray();
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
+    app.get("/reveousbyemail", async (req, res) => {
+      let quary = {};
+      if (req.query.email) {
+        quary = {
+          userEmail: req.query.email,
+        };
+      }
+      const data = await revews.find(quary).toArray();
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
     app.post("/poats", async (req, res) => {
       const data = req.body;
       const rejult = await services.insertOne(data);
+      res.send(rejult);
+    });
+    app.post("/revewinfo", async (req, res) => {
+      const data = req.body;
+      const rejult = await revews.insertOne(data);
       res.send(rejult);
     });
   } finally {
