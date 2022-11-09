@@ -127,9 +127,28 @@ const run = async () => {
       const rejult = await revews.updateOne(quary, updateData, optins);
       res.send(rejult);
     });
+    app.put("/updatepost/:id", async (req, res) => {
+      const { id } = req.params;
+      const { body } = req;
+      const quary = { _id: ObjectId(id) };
+      const optins = { upsert: true };
+      const updateData = {
+        $set: {
+          body: body.body,
+        },
+      };
+      const rejult = await services.updateOne(quary, updateData, optins);
+      res.send(rejult);
+    });
     app.delete("/deleterevew/:id", async (req, res) => {
       const { id } = req.params;
       const rejult = await revews.deleteOne({ _id: ObjectId(id) });
+      res.send(rejult);
+    });
+    app.delete("/deletePost/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const rejult = await services.deleteOne({ _id: ObjectId(id) });
       res.send(rejult);
     });
   } finally {
