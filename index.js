@@ -36,7 +36,11 @@ const run = async () => {
     const revews = client.db("assainment11").collection("revews");
     app.get("/servises", async (req, res) => {
       const query = {};
-      const data = await services.find(query).limit(3).toArray();
+      const data = await services
+        .find(query)
+        .sort({ time: "-1" })
+        .limit(3)
+        .toArray();
       res.send({
         message: true,
         data: data,
@@ -44,7 +48,7 @@ const run = async () => {
     });
     app.get("/allservises", async (req, res) => {
       const query = {};
-      const data = await services.find(query).toArray();
+      const data = await services.find(query).sort({ time: "-1" }).toArray();
       res.send({
         message: true,
         data: data,
@@ -57,6 +61,11 @@ const run = async () => {
         message: true,
         data: data,
       });
+    });
+    app.get("/allrevewsbyid/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = await revews.findOne({ _id: ObjectId(id) });
+      res.send(data);
     });
     app.get("/allrevew/:id", async (req, res) => {
       const { id } = req.params;
@@ -104,6 +113,19 @@ const run = async () => {
         message: true,
         data: token,
       });
+    });
+    app.put("/updatereveow/:id", async (req, res) => {
+      const { id } = req.params;
+      const { body } = req;
+      const quary = { _id: ObjectId(id) };
+      const optins = { upsert: true };
+      const updateData = {
+        $set: {
+          body: body.body,
+        },
+      };
+      const rejult = await revews.updateOne(quary, updateData, optins);
+      res.send(rejult);
     });
     app.delete("/deleterevew/:id", async (req, res) => {
       const { id } = req.params;
