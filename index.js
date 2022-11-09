@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { query } = require("express");
+const jwttoken = require("jsonwebtoken");
 const app = express();
 require("dotenv").config();
 //meselWoore
@@ -15,6 +16,20 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+const jwtVarify = (req, res, next) => {
+  const tokenInfo = req.headers.authorijation;
+  if (!tokenInfo) {
+    return res.status(401).send({ message: "unauthfffffffforijes" });
+  }
+  const token = tokenInfo.split(" ")[1];
+  jwttoken.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+    if (error) {
+      return res.status(403).send({ message: "unauthorijes" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 const run = async () => {
   try {
     const services = client.db("assainment11").collection("services");
@@ -46,13 +61,17 @@ const run = async () => {
     app.get("/allrevew/:id", async (req, res) => {
       const { id } = req.params;
       const quary = { revewId: id };
-      const data = await revews.find(quary).toArray();
+      const data = await revews.find(quary).sort({ postTime: "-1" }).toArray();
       res.send({
         message: true,
         data: data,
       });
     });
-    app.get("/reveousbyemail", async (req, res) => {
+    app.get("/reveousbyemail", jwtVarify, async (req, res) => {
+      const decoded = req.decoded.email;
+      if (decoded !== req.query.email) {
+        res.status(403).send({ message: "email paini" });
+      }
       let quary = {};
       if (req.query.email) {
         quary = {
@@ -74,6 +93,17 @@ const run = async () => {
       const data = req.body;
       const rejult = await revews.insertOne(data);
       res.send(rejult);
+    });
+    //JWT token apliex
+    app.post("/jwttoken", async (req, res) => {
+      const user = req.body;
+      const token = jwttoken.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "1h",
+      });
+      res.send({
+        message: true,
+        data: token,
+      });
     });
     app.delete("/deleterevew/:id", async (req, res) => {
       const { id } = req.params;
