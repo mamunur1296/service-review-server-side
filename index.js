@@ -16,6 +16,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+//jwt medelwore function
 const jwtVarify = (req, res, next) => {
   const tokenInfo = req.headers.authorijation;
   if (!tokenInfo) {
@@ -34,6 +35,7 @@ const run = async () => {
   try {
     const services = client.db("assainment11").collection("services");
     const revews = client.db("assainment11").collection("revews");
+    //get services
     app.get("/servises", async (req, res) => {
       const query = {};
       const data = await services
@@ -46,6 +48,7 @@ const run = async () => {
         data: data,
       });
     });
+    //get all services
     app.get("/allservises", async (req, res) => {
       const query = {};
       const data = await services.find(query).sort({ time: "-1" }).toArray();
@@ -54,6 +57,20 @@ const run = async () => {
         data: data,
       });
     });
+    //agate all reveow
+    app.get("/allreveow", async (req, res) => {
+      const query = {};
+      const data = await revews
+        .find(query)
+        .sort({ time: "-1" })
+        .limit(3)
+        .toArray();
+      res.send({
+        message: true,
+        data: data,
+      });
+    });
+    //gate reveow by id
     app.get("/servicedetails/:id", async (req, res) => {
       const { id } = req.params;
       const data = await services.findOne({ _id: ObjectId(id) });
@@ -62,11 +79,13 @@ const run = async () => {
         data: data,
       });
     });
+    //all reveow by id
     app.get("/allrevewsbyid/:id", async (req, res) => {
       const { id } = req.params;
       const data = await revews.findOne({ _id: ObjectId(id) });
       res.send(data);
     });
+    //all reveow by id
     app.get("/allrevew/:id", async (req, res) => {
       const { id } = req.params;
       const quary = { revewId: id };
@@ -76,6 +95,7 @@ const run = async () => {
         data: data,
       });
     });
+    //gate all reveow s
     app.get("/reveousbyemail", jwtVarify, async (req, res) => {
       const decoded = req.decoded.email;
       if (decoded !== req.query.email) {
@@ -93,11 +113,13 @@ const run = async () => {
         data: data,
       });
     });
+    //post optine applay
     app.post("/poats", async (req, res) => {
       const data = req.body;
       const rejult = await services.insertOne(data);
       res.send(rejult);
     });
+    //post reveow info
     app.post("/revewinfo", async (req, res) => {
       const data = req.body;
       const rejult = await revews.insertOne(data);
@@ -114,6 +136,7 @@ const run = async () => {
         data: token,
       });
     });
+    //update info
     app.put("/updatereveow/:id", async (req, res) => {
       const { id } = req.params;
       const { body } = req;
@@ -127,6 +150,7 @@ const run = async () => {
       const rejult = await revews.updateOne(quary, updateData, optins);
       res.send(rejult);
     });
+    //update post
     app.put("/updatepost/:id", async (req, res) => {
       const { id } = req.params;
       const { body } = req;
@@ -143,11 +167,13 @@ const run = async () => {
       const rejult = await services.updateOne(quary, updateData, optins);
       res.send(rejult);
     });
+    //delete option instal
     app.delete("/deleterevew/:id", async (req, res) => {
       const { id } = req.params;
       const rejult = await revews.deleteOne({ _id: ObjectId(id) });
       res.send(rejult);
     });
+    //delet post
     app.delete("/deletePost/:id", async (req, res) => {
       const { id } = req.params;
       console.log(id);
