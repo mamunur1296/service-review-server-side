@@ -135,6 +135,9 @@ const run = async () => {
       const updateData = {
         $set: {
           body: body.body,
+          title: body.title,
+          photo: body.photo,
+          price: body.price,
         },
       };
       const rejult = await services.updateOne(quary, updateData, optins);
